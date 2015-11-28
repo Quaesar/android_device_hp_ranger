@@ -1,0 +1,107 @@
+import /init.recovery.${ro.hardware}.rc
+
+on early-init
+    start ueventd
+
+    start busybox_install
+    start chmodlibs
+    start loadcfg80211
+    
+on init
+    export PATH /sbin:/system/bin
+    export LD_LIBRARY_PATH .:/sbin:/vendor/lib:/system/lib
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+    
+    symlink /system/etc /etc
+
+    mkdir /sdcard
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mkdir /app
+    mount /tmp /tmp tmpfs
+
+    chown root shell /tmp
+    chmod 0775 /tmp
+
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 18D1
+    write /sys/class/android_usb/android0/idProduct D001
+    write /sys/class/android_usb/android0/functions adb
+    write /sys/class/android_usb/android0/iManufacturer ${ro.product.manufacturer}
+    write /sys/class/android_usb/android0/iProduct ${ro.product.model}
+    write /sys/class/android_usb/android0/iSerial ${ro.serialno}
+
+#    start console
+    start woloscalarsrvd
+#kyle add start
+    start eth0_up
+    start config_net
+    start loadBcm43241
+#kyle add end
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+
+    start recovery
+# services
+service ueventd /sbin/ueventd
+    critical
+
+service busybox_install /system/bin/busybox --install -s /system/bin/
+    class default
+    disabled
+    user root
+
+service console /system/bin/busybox sh
+    class default
+    console
+    disabled
+    user root
+#kyle add start
+service eth0_up /system/bin/busybox ifconfig eth0 up
+    disabled
+    oneshot
+service config_net /system/bin/busybox udhcpc -T 1 -t 30 -A 2 -s /system/bin/simple.script
+    disabled
+    oneshot
+
+service chmodlibs /system/bin/busybox chmod 755 /lib -R
+    disabled
+    oneshot
+
+service loadCfg80211 /system/bin/busybox insmod /lib/modules/cfg80211.ko
+    disabled
+    oneshot
+
+service loadBcm43241 /system/bin/busybox insmod /lib/modules/bcm43241.ko
+    disabled
+    oneshot
+#kyle add end
+service woloscalarsrvd /system/bin/woloscalarsrvd
+    class default
+    disabled    
+    user root
+        
+service adbd /sbin/adbd
+    class core
+    socket adbd stream 660 system system
+    disabled
+service recovery /sbin/recovery
+    disabled
+# Always start adbd on userdebug and eng builds
+on property:ro.debuggable=0
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+
+# Restart adbd so it can run as root
+on property:service.adb.root=1
+    write /sys/class/android_usb/android0/enable 0
+    restart adbd
+    write /sys/class/android_usb/android0/enable 1
