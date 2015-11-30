@@ -4,7 +4,7 @@ wifi.interface=wlan0
 ap.interface=wlan0
 ro.sf.lcd_density=160
 
-# from dalmore, check nvidia
+# from macallan, check nvidia
 persist.tegra.nvmmlite = 1
 
 # use glcomposer as the default compositor

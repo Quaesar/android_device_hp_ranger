@@ -92,13 +92,13 @@ PRODUCT_COPY_FILES += \
 
 # Ramdisk
 PRODUCT_PACKAGES += \
-    fstab.dalmore \
-    init.dalmore.rc \
-    init.dalmore.usb.rc \
+    fstab.macallan \
+    init.macallan.rc \
+    init.macallan.usb.rc \
     init.hdcp.rc \
     init.ussrd.rc \
-    power.dalmore.rc \
-    ueventd.dalmore.rc
+    power.macallan.rc \
+    ueventd.macallan.rc
 
 # USB
 PRODUCT_PACKAGES += \
