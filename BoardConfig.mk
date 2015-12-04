@@ -34,7 +34,7 @@ TARGET_BOARD_PLATFORM := tegra4
 # Kernel
 BOARD_KERNEL_CMDLINE := androidboot.selinux=disabled
 TARGET_KERNEL_SOURCE := kernel/hp/ranger
-TARGET_KERNEL_CONFIG := cyanogenmod_ranger_defconfig
+TARGET_KERNEL_CONFIG := tegra11_android_defconfig
 
 # Audio
 USE_LEGACY_AUDIO_POLICY := 1
