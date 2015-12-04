@@ -94,9 +94,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     fstab.macallan \
     init.macallan.rc \
-    init.macallan.usb.rc \
+    init.usb.rc \
     init.hdcp.rc \
-    init.ussrd.rc \
     power.macallan.rc \
     ueventd.macallan.rc
 
