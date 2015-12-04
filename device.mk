@@ -97,6 +97,8 @@ PRODUCT_PACKAGES += \
     init.usb.rc \
     init.hdcp.rc \
     power.macallan.rc \
+    init.tf.rc \
+    init.nv_dev_board.usb.rc \
     ueventd.macallan.rc
 
 # USB
