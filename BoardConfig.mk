@@ -32,9 +32,9 @@ TARGET_NO_BOOTLOADER := true
 TARGET_BOARD_PLATFORM := tegra4
 
 # Kernel
-BOARD_KERNEL_CMDLINE := androidboot.selinux=disabled
+BOARD_KERNEL_CMDLINE := androidboot.selinux=permissive
 TARGET_KERNEL_SOURCE := kernel/hp/ranger
-TARGET_KERNEL_CONFIG := tegra11_android_defconfig
+TARGET_KERNEL_CONFIG := cyanogenmod_ranger_defconfig
 
 # Audio
 USE_LEGACY_AUDIO_POLICY := 1
@@ -67,11 +67,24 @@ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 805306368
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 13379829760
 BOARD_FLASH_BLOCK_SIZE := 4096
 
+# Pre-L blob support
+COMMON_GLOBAL_CFLAGS += \
+  -DADD_LEGACY_MEMORY_DEALER_CONSTRUCTOR_SYMBOL \
+  -DADD_LEGACY_ACQUIRE_BUFFER_SYMBOL
+
 # Recovery
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
 COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
 TARGET_RECOVERY_DEVICE_DIRS += device/hp/ranger
 TARGET_RECOVERY_FSTAB := device/hp/ranger/rootdir/etc/fstab.macallan
+
+# SELinux
+include device/nvidia/sepolicy/sepolicy.mk
+BOARD_SEPOLICY_DIRS += \
+    device/hp/ranger/sepolicy
+
+BOARD_SEPOLICY_UNION += \
+    file_contexts
 
 # Wifi
 BOARD_WPA_SUPPLICANT_DRIVER      := NL80211
@@ -81,10 +94,9 @@ BOARD_WLAN_DEVICE                := bcmdhd
 BOARD_HOSTAPD_DRIVER             := NL80211
 BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_bcmdhd
 WIFI_DRIVER_FW_PATH_PARAM        := "/sys/module/bcmdhd/parameters/firmware_path"
-WIFI_DRIVER_FW_PATH_AP           := "/system/vendor/firmware/bcm4334/fw_bcmdhd_apsta.bin"
-WIFI_DRIVER_FW_PATH_STA          := "/system/vendor/firmware/bcm4334/fw_bcmdhd.bin"
+WIFI_DRIVER_FW_PATH_AP           := "/system/vendor/firmware/bcm43241/fw_bcmdhd_apsta.bin"
+WIFI_DRIVER_FW_PATH_STA          := "/system/vendor/firmware/bcm43241/fw_bcmdhd.bin"
 
-# TWRP
 TW_THEME := landscape_hdpi
 BOARD_HAS_NO_REAL_SDCARD := true
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
@@ -92,6 +104,3 @@ RECOVERY_SDCARD_ON_DATA := true
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/pwm-backlight/brightness"
 TW_NO_BATT_PERCENT := true
 TW_NO_USB_STORAGE := true
-
-# Camera
-USE_CAMERA_STUB := true

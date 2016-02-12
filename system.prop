@@ -4,11 +4,14 @@ wifi.interface=wlan0
 ap.interface=wlan0
 ro.sf.lcd_density=160
 
-# from macallan, check nvidia
+# from dalmore, check nvidia
 persist.tegra.nvmmlite = 1
 
 # use glcomposer as the default compositor
 persist.tegra.compositor=glcomposer
+
+# disable EGL_BUFFER_PRESERVED extension for OpenGLRenderer
+debug.hwui.render_dirty_regions=false
 
 # hwui parameters
 ro.hwui.texture_cache_size=48.0

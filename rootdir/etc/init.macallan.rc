@@ -1,13 +1,12 @@
-Copyright (c) 2011-2013 NVIDIA Corporation.  All Rights Reserved.
+# Copyright (c) 2011-2013 NVIDIA Corporation.  All Rights Reserved.
 #
-#NVIDIA Corporation and its licensors retain all intellectual property and
-#proprietary rights in and to this software and related documentation.  Any
-#use, reproduction, disclosure or distribution of this software and related
-#documentation without an express license agreement from NVIDIA Corporation
-#is strictly prohibited.
+# NVIDIA Corporation and its licensors retain all intellectual property and
+# proprietary rights in and to this software and related documentation.  Any
+# use, reproduction, disclosure or distribution of this software and related
+# documentation without an express license agreement from NVIDIA Corporation
+# is strictly prohibited.
 
-import init.nv_dev_board.usb.rc
-import init.${ro.boot.modem}_macallan.rc
+import init.macallan.usb.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug
@@ -54,12 +53,8 @@ on fs
     mount_all /fstab.macallan
 
 on post-fs-data
-    mkdir /data/misc/wifi 0770 wifi wifi
-    mkdir /data/misc/wifi/sockets 0770 wifi wifi
-    mkdir /data/misc/wifi/firmware 0770 wifi wifi
-    mkdir /data/misc/dhcp 0770 dhcp dhcp
+
     mkdir /data/nvcam 0700 media camera
-    chown dhcp dhcp /data/misc/dhcp
 
     mkdir /data/misc/wminput 0776 system system
 
@@ -68,137 +63,55 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
 
-    # Create GPS folders and set its permissions
-    mkdir /data/gps
-    chown gps system /data/gps/
-    chmod 0770 /data/gps/
-
-# Wolo: start-- Wifi_BT
-#for TI
-#on early-boot
-#    insmod /system/lib/modules/compat/compat.ko
-#    insmod /system/lib/modules/compat/cfg80211.ko
-#    insmod /system/lib/modules/compat/mac80211.ko
-#    insmod /system/lib/modules/compat/wlcore.ko suspen_rx_ba_activity=1
-#    insmod /system/lib/modules/compat/wl18xx.ko dc2dc=0 \
-#     low_band_component=0x2 low_band_component_type=0x5 \
-#     high_band_component=0x1 high_band_component_type=0x9 \
-#     n_antennas_5=0 n_antennas_2=1
-#    insmod /system/lib/modules/compat/wlcore_sdio.ko
-# Wolo: end-- Wifi_BT
-
 on boot
 
-# bluetooth
-
-# Wolo: start-- Wifi_BT
-    # change back to bluetooth from system
+    # Change back to bluetooth from system
     chown bluetooth net_bt_stack /data/misc/bluetooth
-# Wolo: end-- Wifi_BT
 
     # UART device
     chmod 0660 /dev/ttyHS2
     chown bluetooth net_bt_stack /dev/ttyHS2
 
-# Wolo: start-- Wifi_BT
-    # power up/down interface
+    # Bluetooth power up/down interface
     chmod 0660 /sys/class/rfkill/rfkill0/state
     chmod 0660 /sys/class/rfkill/rfkill0/type
     write /sys/class/rfkill/rfkill0/state 0
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
-# Wolo: end-- Wifi_BT
 
     # bluetooth MAC address programming
-
-# Wolo: start-- Wifi_BT
     chown bluetooth net_bt_stack ro.bt.bdaddr_path
-# Wolo: end-- Wifi_BT
-
     chown bluetooth net_bt_stack /system/etc/bluetooth
-
-# Wolo: start-- Wifi_BT
     chown bluetooth net_bt_stack /data/misc/bluetooth
-#    setprop ro.bt.bdaddr_path "/data/misc/bluetooth/bdaddr"
-     setprop ro.bt.bdaddr_path "/data/.bdaddr"
-# Wolo: end-- Wifi_BT
+    setprop ro.bt.bdaddr_path "/data/.bdaddr"
 
-# Wolo: start-- Wifi_BT
-# Wolo: for TI wifi
-# wifi
-#    wait /sys/class/ieee80211/phy0
-#    start add_p2p_iface
-# Wolo: end-- Wifi_BT
-
-# Wolo: start audio(CTS)
+    # Wolo audio(CTS)
     chmod 0770 /dev/snd/hwC1D0
     chmod 0775 /sys/devices/platform/tegra11-i2c.0/i2c-0/0-001c/codec_reg
-# Wolo: end audio
 
-#wolo : wolo driver(CTS)
+    # Wolo UART driver(CTS)
     chmod 0775 /sys/bus/serio/drivers/WOLOUART/control
-#wolo : end
 
-# backlight
+    # backlight
     chown system system /sys/class/backlight/pwm-backlight/brightness
 
-# didim
+    # didim
     chown system system /sys/class/graphics/fb0/device/smartdimmer/enable
     chown system system /sys/class/graphics/fb0/device/smartdimmer/aggressiveness
     chown system system /sys/class/graphics/fb0/device/smartdimmer/sd_window
     chown system system /sys/class/graphics/fb0/device/smartdimmer/sd_window_enable
 
-# CMU
+    # CMU
     chown system system /sys/class/graphics/fb0/device/cmu_enable
     chown system system /sys/class/graphics/fb1/device/cmu_enable
 
-# power
+    # Power
     chown system system /sys/kernel/tegra_cap/core_cap_level
     chown system system /sys/kernel/tegra_cap/core_cap_state
     chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
 
-# Sensor
-    insmod /system/lib/modules/inv-mpu.ko
-    insmod /system/lib/modules/inv-ak8975.ko
-    insmod /system/lib/modules/inv-bmp180.ko
-
-    chown system system /sys/bus/iio/devices/iio:device0/als_value
-    chown system system /sys/bus/iio/devices/iio:device0/als_ir_mode
-    chown system system /sys/bus/iio/devices/iio:device0/proximity_value
-    chown system system /sys/bus/iio/devices/iio:device0/proximity_enable
-
-    chown system system /sys/class/invensense/mpu/accl_enable
-    chown system system /sys/class/invensense/mpu/accl_fifo_enable
-    chown system system /sys/class/invensense/mpu/accl_delay
-    chown system system /sys/class/invensense/mpu/accl_max_range
-    chown system system /sys/class/invensense/mpu/enable
-    chown system system /sys/class/invensense/mpu/gyro_enable
-    chown system system /sys/class/invensense/mpu/gyro_fifo_enable
-    chown system system /sys/class/invensense/mpu/gyro_delay
-    chown system system /sys/class/invensense/mpu/gyro_max_range
-    chown system system /sys/class/invensense/mpu/lpa_delay
-    chown system system /sys/class/invensense/mpu/motion_enable
-    chown system system /sys/class/invensense/mpu/motion_threshold
-    chown system system /sys/class/invensense/mpu/power_state
-    chown system system /sys/class/invensense/mpu/key
-
-    chown system system /sys/class/invensense/mpu/akm89xx/akm89xx/enable
-    chown system system /sys/class/invensense/mpu/akm89xx/akm89xx/delay
-    chown system system /sys/class/invensense/mpu/akm89xx/akm89xx/max_range
-    chown system system /sys/class/invensense/mpu/akm89xx/akm89xx/resolution
-
-    chown system system /sys/class/invensense/mpu/bmpX80/bmpX80/enable
-    chown system system /sys/class/invensense/mpu/bmpX80/bmpX80/delay
-    chown system system /sys/class/invensense/mpu/bmpX80/bmpX80/max_range
-    chown system system /sys/class/invensense/mpu/bmpX80/bmpX80/resolution
-
-# Set debug message level
-    write /proc/sys/kernel/printk 7
-
-# Power management settings
+    # Power management settings
     write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp 0
-    #write /sys/module/tegra3_emc/parameters/emc_enable 0
-    #write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 1000000
 
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor conservative
     write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor conservative
@@ -236,50 +149,25 @@ on boot
     chown system system /sys/kernel/tegra_cap/cbus_cap_level
     chown system system /sys/kernel/tegra_cap/cbus_cap_state
     chown system system /sys/devices/platform/host1x/gr3d/enable_3d_scaling
-    chown system system /sys/devices/platform/pwm-fan/pwm_cap
 
     # TODO: Remove once powerhal takes over app profiles
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
 
-# nvdps
+    # nvdps
     chown system system /sys/class/graphics/fb0/device/nvdps
 
-# Default Read Ahead value for sdcards
+    # Default Read Ahead value for sdcards
     write /sys/block/mmcblk0/queue/read_ahead_kb 2048
     write /sys/block/mmcblk1/queue/read_ahead_kb 2048
 
-# Wiimote connect status
+    # Wiimote connect status
     write /data/misc/wminput/connected 0
     chmod 0666 /data/misc/wminput/connected
 
-# GPS init
-    write /sys/class/gpio/export 49
-    write /sys/class/gpio/gpio49/value 0
-    write /sys/class/gpio/gpio49/direction out
-    chown root system /sys/class/gpio/gpio49/value
-    chmod 0664 /sys/class/gpio/gpio49/value
-    write /sys/class/gpio/export 189
-    write /sys/class/gpio/gpio189/direction out
-    write /sys/class/gpio/gpio189/value 1
-    chown root system /sys/class/gpio/gpio189/value
-    chmod 0664 /sys/class/gpio/gpio189/value
-
-# Wolo: start-- Wifi_BT
-# Load WiFi driver
-    insmod /system/lib/modules/cfg80211.ko
-# Wolo: end-- Wifi_BT
-
-# EDP attributes
+    # EDP attributes
     write /sys/power/edp/battery/backlight/notify 1
     write /sys/power/edp/battery/imx091/notify 1
     write /sys/power/edp/battery/speaker/notify 1
-
-# set hwui properties depending on the screen resolution and the memory size
-service set_hwui_params /system/bin/set_hwui_params.sh
-    class main
-    user root
-    group root
-    oneshot
 
 # CPU Boost: boost CPU on input events
 service input-cfboost /system/bin/input_cfboost_init.sh
@@ -289,67 +177,8 @@ service input-cfboost /system/bin/input_cfboost_init.sh
     oneshot
 
 on property:ro.debuggable=1
-    # Invensense interface
-    chmod 0666 /sys/class/invensense/mpu/accl_bias
-    chmod 0666 /sys/class/invensense/mpu/accl_enable
-    chmod 0666 /sys/class/invensense/mpu/accl_fifo_enable
-    chmod 0666 /sys/class/invensense/mpu/accl_fs
-    chmod 0666 /sys/class/invensense/mpu/accl_matrix
-    chmod 0666 /sys/class/invensense/mpu/clock_source
-    chmod 0666 /sys/class/invensense/mpu/compass_enable
-    chmod 0666 /sys/class/invensense/mpu/compass_matrix
-    chmod 0666 /sys/class/invensense/mpu/compass_scale
-    chmod 0666 /sys/class/invensense/mpu/dev
-    chmod 0666 /sys/class/invensense/mpu/dmp_firmware
-    chmod 0666 /sys/class/invensense/mpu/enable
-    chmod 0666 /sys/class/invensense/mpu/fifo_rate
-    chmod 0666 /sys/class/invensense/mpu/firmware_loaded
-    chmod 0666 /sys/class/invensense/mpu/flick_axis
-    chmod 0666 /sys/class/invensense/mpu/flick_counter
-    chmod 0666 /sys/class/invensense/mpu/flick_int_on
-    chmod 0666 /sys/class/invensense/mpu/flick_lower
-    chmod 0666 /sys/class/invensense/mpu/flick_message_on
-    chmod 0666 /sys/class/invensense/mpu/flick_upper
-    chmod 0666 /sys/class/invensense/mpu/gyro_enable
-    chmod 0666 /sys/class/invensense/mpu/gyro_fifo_enable
-    chmod 0666 /sys/class/invensense/mpu/gyro_fs
-    chmod 0666 /sys/class/invensense/mpu/gyro_matrix
-    chmod 0666 /sys/class/invensense/mpu/key
-    chmod 0666 /sys/class/invensense/mpu/lpa_freq
-    chmod 0666 /sys/class/invensense/mpu/lpa_mode
-    chmod 0666 /sys/class/invensense/mpu/pedometer_steps
-    chmod 0666 /sys/class/invensense/mpu/pedometer_time
-    chmod 0666 /sys/class/invensense/mpu/power
-    chmod 0666 /sys/class/invensense/mpu/power_state
-    chmod 0666 /sys/class/invensense/mpu/raw_accl
-    chmod 0666 /sys/class/invensense/mpu/raw_gyro
-    chmod 0666 /sys/class/invensense/mpu/reg_dump
-    chmod 0666 /sys/class/invensense/mpu/self_test
-    chmod 0666 /sys/class/invensense/mpu/temp_offset
-    chmod 0666 /sys/class/invensense/mpu/temp_scale
-    chmod 0666 /sys/class/invensense/mpu/temperature
-    chmod 0666 /sys/class/invensense/mpu/uevent
-
-    # Invensense debug register interface.
-    chmod 0666 /sys/class/invensense/mpu/dbg_reg
-    chmod 0666 /sys/class/invensense/mpu/dbg_dat
-
-on property:ro.debuggable=1
     # EMC debug interface
     chmod 666 /sys/kernel/debug/tegra_emc/eack_state
-
-on property:ro.debuggable=1
-#    start debug_wifi
-
-# Wolo: start-- Wifi_BT
-
-#shared transport user space mgr service for Bluetooth, FM and GPS
-service uim /system/bin/uim-sysfs
-    class core
-    user bluetooth
-    group root
-    oneshot
-# Wolo: end-- Wifi_BT
 
 service dhcpcd_p2p_p2p0 /system/bin/dhcpcd p2p-p2p0-0
     class main
@@ -415,37 +244,22 @@ service fuse_usbdrive2 /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_
     class late_start
     disabled
 
-# bugreport is triggered by the VOLUME-DOWN and VOLUME-UP keys
-service bugreport /system/bin/dumpstate -d -v -o /data/storage/bugreports/bugreport
-    class main
-    disabled
-    oneshot
-    keycodes 115 114
-
-# wifiloader - set the wifi commchip_id accordingly
-service wifiloader /system/bin/wifi_loader.sh
-    class main
-    user root
-    group root
-#    oneshot
-# Wolo: end-- Wifi_BT
-
 # Mount usb drives as /usbdrive. Generally usb drives are formatted with FAT
 # filesystem, so we support FAT as of now.
 on device-added-/sys/block/sda
-    mount vfat /dev/block/sda /mnt/media_rw/usbdrive
+    mount auto /dev/block/sda /mnt/media_rw/usbdrive
 
 on device-removed-/sys/block/sda
     umount /mnt/media_rw/usbdrive
     
 on device-added-/sys/block/sdb
-    mount vfat /dev/block/sdb /mnt/media_rw/usbdrive1
+    mount auto /dev/block/sdb /mnt/media_rw/usbdrive1
 
 on device-removed-/sys/block/sdb
     umount /mnt/media_rw/usbdrive1
     
 on device-added-/sys/block/sdc
-    mount vfat /dev/block/sdc /mnt/media_rw/usbdrive2
+    mount auto /dev/block/sdc /mnt/media_rw/usbdrive2
 
 on device-removed-/sys/block/sdc
     umount /mnt/media_rw/usbdrive2
@@ -453,99 +267,17 @@ on device-removed-/sys/block/sdc
 on property:init.svc.hciattach=stopped
     write /sys/devices/platform/reg-userspace-consumer.1/state disabled
 
-# Start GPS daemon
-on boot
-    service gps-daemon /system/bin/glgps_nvidiaTegra2android -c /system/etc/gps/gpsconfig.xml
-    user gps
-    socket gps seqpacket 0660 gps system
-    group system inet sdcard_rw sdcard_r
-    class late_start
-
-# Prepare TF service
-import init.tf.rc
-
-# Enable PowerService
-    service powerservice /system/bin/powerservice
-    class main
-    user system
-    group system
-
-# Wolo_BSP: start-- disable modem & ril
-# test mode for RIL: Should probably be removed from production phones
-#service ril-daemon-test /system/bin/rild
-#    socket rild-testmode stream 666 root radio
-#    socket rild-debug stream 660 radio system
-#    user root
-#    group radio cache inet misc audio sdcard_rw sdcard_r
-#    disabled
-
-# Start Icera switcher daemon
-#service icera-switcher /system/bin/icera-switcherd
-#    class main
-#    user root
-#    group log
-
-# Icera firmware update
-#service icera-loader /system/bin/icera-loader /dev/ttyACM0 /data/modem_fw
-#    class main
-#    user radio
-#    group radio
-#    oneshot
-# Wolo_BSP: end-- disable modem & ril
-
 # Set up HDCP
 import init.hdcp.rc
 
-#Raydium touch setting
-service rm_ts_service    /system/bin/rm_ts_server
+# Raydium touch setting
+service rm_ts_service /system/bin/rm_ts_server
     class main
     user system
     group system input
 
-# create filesystems if necessary
-service setup_fs /system/bin/setup_fs \
-        /dev/block/platform/sdhci-tegra.3/by-name/UDA \
-        /dev/block/platform/sdhci-tegra.3/by-name/CAC
-    class core
-    user root
-    group root
-    oneshot
-
 # unified scaling setup
-service ussr_setup /system/bin/ussr_setup.sh
-    class main
-    user root
-    group root
-    oneshot
-
-# unified scaling process
-service ussrd /system/bin/ussrd
-    user system
-    group system
-    class main
-
-# unified scaling watchdog process
-service usdwatchdog /system/bin/usdwatchdog --wait 30
-    user system
-    group system
-    class main
-
-# start pbc daemon
-service pbc /system/bin/pbc
-    class main
-    user root
-    group root
-
-# Wolo_BSP: start-- disable modem & ril
-# Second boot and onwards
-#on property:ril.testmode=1
-#    stop ril-daemon
-#    start ril-daemon-test
-
-#on property:ril.testmode=0
-#    stop ril-daemon-test
-#    start ril-daemon
-# Wolo_BSP: end-- disable modem & ril
+import init.ussrd.rc
 
 service dns_masq /system/bin/dnsmasq --no-daemon --no-resolv --no-poll --dhcp-option-force=43,ANDROID_METERED --dhcp-range=192.168.42.2,192.168.42.254,1h &
     class main
@@ -554,175 +286,42 @@ service dns_masq /system/bin/dnsmasq --no-daemon --no-resolv --no-poll --dhcp-op
     disabled
     oneshot
 
-# Wolo: start-- Wifi_BT
-# Wolo: for BCM 
-###17r20 -- kernel version:3.4.35
-#service p2p_supplicant /system/bin/wpa_supplicant \
-#    -Dnl80211 -iwlan0 -puse_p2p_group_interface=1 -e/data/misc/wifi/entropy.bin -c/data/misc/wifi/wpa_supplicant.conf 
-###17r25.1 -- kernel version:3.4.57 (from dalmore)
-# From BRCM
-#service p2p_supplicant /system/bin/wpa_supplicant \
-#    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-#    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
-#    -O/data/misc/wifi/sockets -d \
-#    -puse_p2p_group_interface=1 p2p_device=1 \
-#    -e/data/misc/wifi/entropy.bin \
-#    -g/dev/socket/wpa_wlan0
-#    class main
-#    socket wpa_wlan0 dgram 660 wifi wifi
-#    disabled
-#    oneshot
-
-#From NV
-service p2p_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
+service p2p_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
-    -O/data/misc/wifi/sockets -N \
+    -I/system/etc/wifi/wpa_supplicant_overlay.conf -N \
     -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf \
     -I/system/etc/wifi/p2p_supplicant_overlay.conf \
     -puse_p2p_group_interface=1 -e/data/misc/wifi/entropy.bin \
     -g@android:wpa_wlan0
+    #   we will start as root and wpa_supplicant will switch to user wifi
+    #   after setting up the capabilities required for WEXT
+    #   user wifi
+    #   group wifi inet keystore
     class main
     socket wpa_wlan0 dgram 660 wifi wifi
     disabled
     oneshot
 
-
-# Wolo: for TI
-# service p2p_supplicant /system/bin/wpa_supplicant \
-#    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-#    -I/system/etc/wifi/p2p_disabled.conf -N \
-#    -ip2p0 -Dnl80211 -c /data/misc/wifi/p2p_supplicant.conf \
-#    -O/data/misc/wifi/sockets -g@android:wpa_wlan0
-# Wolo: end-- Wifi_BT
-#   we will start as root and wpa_supplicant will switch to user wifi
-#   after setting up the capabilities required for WEXT
-#   user wifi
-#   group wifi inet keystore
-####    class main
-####    socket wpa_wlan0 dgram 660 wifi wifi
-####    disabled
-####    oneshot
-
-# Wolo: for BCM 
-###17r20 -- kernel version:3.4.35
-####  service wpa_suppl_nl /system/bin/wpa_supplicant \
-####    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf -N \
-####    -ip2p0 -Dnl80211 -c /data/misc/wifi/p2p_supplicant.conf -e/data/misc/wifi/entropy.bin -puse_p2p_group_interface=1
-#    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf -puse_multi_chan_concurrent=1 -N \
-#    -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf -e/data/misc/wifi/entropy.bin -puse_p2p_group_interface=1use_multi_chan_concurrent=1
-#   we will start as root and wpa_supplicant will switch to user wifi
-#   after setting up the capabilities required for WEXT
-#   user wifi
-#   group wifi inet keystore
-####    class main
-####    socket wpa_wlan0 dgram 660 wifi wifi
-####    disabled
-####    oneshot
-
-#### service wpa_suppl_wext /system/bin/wpa_supplicant \
-####    -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
-#   we will start as root and wpa_supplicant will switch to user wifi
-#   after setting up the capabilities required for WEXT
-#   user wifi
-#   group wifi inet keystore
-####    class main
-####    socket wpa_wlan0 dgram 660 wifi wifi
-####    disabled
-####    oneshot
-
-###17r25.1 -- kernel version:3.4.57 (from dalmore)
-service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
+service wpa_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
     -I/system/etc/wifi/wpa_supplicant_overlay.conf \
-    -O/data/misc/wifi/sockets \
     -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
-#   we will start as root and wpa_supplicant will switch to user wifi
-#   after setting up the capabilities required for WEXT
-#   user wifi
-#   group wifi inet keystore
+    #   we will start as root and wpa_supplicant will switch to user wifi
+    #   after setting up the capabilities required for WEXT
+    #   user wifi
+    #   group wifi inet keystore
     class main
     socket wpa_wlan0 dgram 660 wifi wifi
     disabled
     oneshot
 
-# Wolo: for TI
-#service wpa_supplicant /system/bin/wpa_supplicant \
-#    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf -e/data/misc/wifi/entropy.bin \
-#    -O/data/misc/wifi/sockets -g@android:wpa_wlan0
-#    class main
-#    socket wpa_wlan0 dgram 660 wifi wifi
-#    disabled
-#    oneshot
-
-# default chipset (currently bcm43241)
-on property:wifi.commchip_id=0
-    symlink /system/vendor/firmware/bcm43241/fw_bcmdhd.bin /data/misc/wifi/firmware/fw_bcmdhd.bin
-    symlink /system/vendor/firmware/bcm43241/fw_bcmdhd.bin /data/misc/wifi/firmware/fw_bcmdhd_apsta.bin
-#    symlink /system/etc/nvram_43241.txt /data/misc/wifi/firmware/nvram.txt
-    symlink /system/etc/nvram_43241_ww.txt /data/misc/wifi/firmware/nvram_ww.txt
-    symlink /system/etc/nvram_43241_us.txt /data/misc/wifi/firmware/nvram_us.txt
-    symlink /system/etc/nvram_43241_id.txt /data/misc/wifi/firmware/nvram_id.txt
-#    insmod /system/lib/modules/bcm43241.ko
-    insmod /system/lib/modules/bcmdhd.ko
-###17r20 -- kernel version:3.4.35
-#    setprop wifi.supplicant wpa_suppl_nl
-
-# bcm43241 chipset
-on property:wifi.commchip_id=6
-    symlink /system/vendor/firmware/bcm43241/fw_bcmdhd.bin /data/misc/wifi/firmware/fw_bcmdhd.bin
-    symlink /system/vendor/firmware/bcm43241/fw_bcmdhd.bin /data/misc/wifi/firmware/fw_bcmdhd_apsta.bin
-#   symlink /system/etc/nvram_43241.txt /data/misc/wifi/firmware/nvram.txt
-    symlink /system/etc/nvram_43241_ww.txt /data/misc/wifi/firmware/nvram_ww.txt
-    symlink /system/etc/nvram_43241_us.txt /data/misc/wifi/firmware/nvram_us.txt
-    symlink /system/etc/nvram_43241_id.txt /data/misc/wifi/firmware/nvram_id.txt
-#    insmod /system/lib/modules/bcm43241.ko
-    insmod /system/lib/modules/bcmdhd.ko
-###17r20 -- kernel version:3.4.35
-#    setprop wifi.supplicant wpa_suppl_nl
-# Wolo: end-- Wifi_BT
-
-#gps wl18XX
-service devproxy /system/bin/devproxy
-    class main
-    disabled
-    oneshot
-    user system
-    group gps
-
-service agnss_connect /system/bin/agnss_connect -p
-    class main
-    disabled
-    oneshot
-    user system
-    group gps
-
-# Wolo: start-- Wifi_BT
-# Wolo: for TI
-#service add_p2p_iface /system/bin/add_p2p_iface.sh
-#    class main
-#    disabled
-#    oneshot
-#    user root
-#    group root
-# Wolo: end-- Wifi_BT
-
-service debug_wifi /system/bin/debug_wifi.sh
-    class main
-    disabled
-    oneshot
-    user root
-    group root
-
-service woloscalar_serv /system/xbin/woloscalarsrvd
+# start tf_daemon service
+service tf_daemon /system/bin/tf_daemon -storageDir /data/tf -d
     class main
     user root
-    group root
-#    oneshot
+    group shell
 
-# wolong service
-service woloservice /system/bin/woloserviced
-    class main
-    socket wolosocket stream 666 system system
-    socket wolosocketb stream 666 system system
+# may restart due to /data/tf not existing yet
+on property:init.svc.tf_daemon=restarting
+    mkdir /data/tf
 

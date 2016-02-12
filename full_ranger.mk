@@ -29,5 +29,5 @@ $(call inherit-product, device/hp/ranger/device.mk)
 PRODUCT_NAME := full_ranger
 PRODUCT_DEVICE := ranger
 PRODUCT_BRAND := hp
-PRODUCT_MODEL := Slate 21
+PRODUCT_MODEL := Slate 21 Pro
 PRODUCT_MANUFACTURER := Hewlett-Packard
